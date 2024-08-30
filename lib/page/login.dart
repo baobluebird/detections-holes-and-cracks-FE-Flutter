@@ -118,14 +118,14 @@ class _LoginState extends State<Login> with SingleTickerProviderStateMixin {
                     Center(
                       child: ListView(
                         shrinkWrap: true,
-                        padding: const EdgeInsets.all(25),
+                        padding: const EdgeInsets.all(30),
                         children: <Widget>[
                           Image.asset('assets/images/logo_app.png',
-                              width: 300, height: 300),
+                              width: 150, height: 150),
                           Lottie.asset('assets/car_animation.json'),
                           const SizedBox(height: 40),
                           Text(
-                            'DUT\'s Creative Idea Challenge',
+                            'DUT\'s Safe Road',
                             textAlign: TextAlign.center,
                             style: GoogleFonts.rubik(
                               fontSize: 35,

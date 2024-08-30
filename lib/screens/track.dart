@@ -24,8 +24,9 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
       Completer<GoogleMapController>();
   late Position _currentPosition;
   List<dynamic> largeHoles = [];
+  List<dynamic> maintainRoad = [];
   LatLng? _selectedPosition;
-  int _currentHoleIndex = 0; // Index of the current hole being checked
+  int _currentHoleIndex = 0;
   Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   final TextEditingController _destinationController = TextEditingController();
@@ -34,16 +35,17 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
   bool _isMounted = false;
   late BitmapDescriptor _userIcon;
   late BitmapDescriptor _largeHoleIcon;
+  late BitmapDescriptor _maintainRoadIcon;
   bool _isWarningDisplayed = false;
   Map<int, Set<String>> _holeWarnings =
-      {}; // Map to store shown warnings for each hole
+      {};
   final AudioPlayer _audioPlayer = AudioPlayer();
   double?
-      _currentDistance; // Thêm biến trạng thái để lưu trữ khoảng cách hiện tại
+      _currentDistance;
   final myBox = Hive.box('myBox');
   String _idUser = '';
   static const CameraPosition _initialPosition = CameraPosition(
-    target: LatLng(16.0736, 108.1499), // Default to Danang, Vietnam
+    target: LatLng(16.0736, 108.1499),
     zoom: 14.4746,
   );
 
@@ -82,6 +84,8 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
   Future<void> _loadCustomIcons() async {
     final Uint8List location =
         await getBytesFromAsset('assets/images/car.png', 160);
+    final Uint8List maintain =
+    await getBytesFromAsset('assets/images/fix_road.png', 160);
     final Uint8List largeHole =
         await getBytesFromAsset('assets/images/large_hole.png', 130);
 
@@ -89,6 +93,7 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
       setState(() {
         _userIcon = BitmapDescriptor.fromBytes(location);
         _largeHoleIcon = BitmapDescriptor.fromBytes(largeHole);
+        _maintainRoadIcon = BitmapDescriptor.fromBytes(maintain);
       });
     }
   }
@@ -134,7 +139,8 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
     if (_isMounted) {
       setState(() {
         _markers.removeWhere(
-            (marker) => marker.markerId.value.contains('largeHole'));
+            (marker) => marker.markerId.value.contains('largeHole') ||
+                marker.markerId.value.contains('maintainRoad'));
         _markers.add(Marker(
           markerId: MarkerId('currentLocation'),
           position:
@@ -156,7 +162,19 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
           );
           largeHoleIndex++;
         }
-
+        int maintainRoadIndex = 0;
+        for (var item in maintainRoad) {
+          _markers.add(
+            Marker(
+              markerId: MarkerId('maintainRoad$maintainRoadIndex'),
+              position: LatLng(item[0], item[1]),
+              infoWindow:
+              InfoWindow(title: 'Maintain Road', snippet: 'Be cautious!'),
+              icon: _maintainRoadIcon,
+            ),
+          );
+          maintainRoadIndex++;
+        }
         if (_selectedPosition != null) {
           _markers.add(Marker(
             markerId: MarkerId('selectedLocation'),
@@ -390,6 +408,33 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
     }
   }
 
+  Future<void> _showMaintenanceWarningDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cảnh báo'),
+          content: Text('Đoạn đường bạn đi đang được bảo trì, bạn có muốn tiếp tục không?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('Tiếp tục'),
+            ),
+            TextButton(
+              onPressed: () {
+                _clearTrack();
+                Navigator.of(context).pop(false);
+              },
+              child: Text('Hủy bỏ'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _uploadCoordinates(List<Map<String, double>> coordinates) async {
     final response = await http.post(
       Uri.parse('$ip/detection/post-location-tracking'),
@@ -400,18 +445,24 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
     if (response.statusCode == 200) {
       print('Response: ${response.body}');
 
-      List<dynamic> jsonResponse =
-          jsonDecode(response.body)['matchingCoordinates'];
+      List<dynamic> Hole =
+          jsonDecode(response.body)['matchingCoordinatesHole'];
+      List<dynamic> MaintainRoad =
+      jsonDecode(response.body)['matchingCoordinatesMaintainRoad'];
 
       if (_isMounted) {
         setState(() {
-          largeHoles = jsonResponse;
+          largeHoles = Hole;
+          maintainRoad = MaintainRoad;
           _currentHoleIndex = 0;
           _holeWarnings.clear();
         });
       }
       _updateMarkers();
-      if (largeHoles.isEmpty) {
+      if (maintainRoad.isNotEmpty) {
+        _showMaintenanceWarningDialog();
+      }
+      if (largeHoles.isEmpty ){
         if (_isMounted) {
           setState(() {
             _currentDistance = 0;
@@ -431,6 +482,7 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
           });
         }
       }
+
 
       print('Coordinates uploaded successfully');
       print('Matching Coordinates: $largeHoles');
@@ -501,12 +553,14 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
       setState(() {
         _markers.removeWhere((marker) =>
             marker.markerId.value.contains('largeHole') ||
-            marker.markerId.value == 'selectedLocation');
+                marker.markerId.value.contains('maintainRoad') ||
+                marker.markerId.value == 'selectedLocation');
         _polylines.clear();
         _selectedPosition = null;
         _currentHoleIndex = 0;
         _currentDistance = 0;
         largeHoles = [];
+        maintainRoad = [];
         _holeWarnings.clear();
       });
     }
