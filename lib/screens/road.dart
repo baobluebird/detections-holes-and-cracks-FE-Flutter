@@ -87,6 +87,8 @@ class _MaintainRoadState extends State<MaintainRoadScreen> {
                     locationA: _parseLatLng(road['locationA']),
                     locationB: _parseLatLng(road['locationB']),
                     dateMaintain: road['dateMaintain'],
+                    createdAt: road['createdAt'],
+                    updatedAt: road['updatedAt'],
                   ),
                 ),
               );
@@ -108,8 +110,8 @@ class _MaintainRoadState extends State<MaintainRoadScreen> {
                         Text('Destination: ${road['destinationName']}'),
                         Text('Location A: ${road['locationA']}'),
                         Text('Location B: ${road['locationB']}'),
-                        Text('Date Maintain: ${road['dateMaintain']} days'),
-                        Text('Created At: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.parse(road['createdAt']))}'),
+                        Text('Date Maintain: ${road['dateMaintain']} days ${DateFormat('yyyy/MM/dd ').format(DateTime.parse(road['createdAt']))} - ${DateFormat('yyyy/MM/dd ').format(DateTime.parse(road['updatedAt']))}'),
+
                       ],
                     ),
                   ),

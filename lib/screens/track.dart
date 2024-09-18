@@ -652,12 +652,13 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag2',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _getCurrentLocation,
               tooltip: 'Show My Location',
-              child: const Icon(Icons.my_location),
+              child:
+              Image.asset('assets/images/car.png', width: 30, height: 30),
             ),
           ),
           Positioned(
@@ -665,7 +666,7 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag3',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _clearTrack,
@@ -678,7 +679,7 @@ class _TrackingMapScreenState extends State<TrackingMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag4',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: () => _sendHelp(),

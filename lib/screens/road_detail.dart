@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import '../ipconfig/ip.dart';
 
@@ -14,6 +15,8 @@ class MaintainRoadDetailScreen extends StatefulWidget {
   final LatLng locationA;
   final LatLng locationB;
   final int dateMaintain;
+  final String createdAt;
+  final String updatedAt;
 
   MaintainRoadDetailScreen({
     required this.sourceName,
@@ -21,6 +24,8 @@ class MaintainRoadDetailScreen extends StatefulWidget {
     required this.locationA,
     required this.locationB,
     required this.dateMaintain,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   @override
@@ -111,7 +116,7 @@ class _MaintainRoadDetailScreenState extends State<MaintainRoadDetailScreen> {
               children: [
                 Text('Source: ${widget.sourceName}'),
                 Text('Destination: ${widget.destinationName}'),
-                Text('Date Maintain: ${widget.dateMaintain} days'),
+                Text('Date Maintain: ${widget.dateMaintain} days ${DateFormat('yyyy/MM/dd ').format(DateTime.parse(widget.createdAt))} - ${DateFormat('yyyy/MM/dd ').format(DateTime.parse(widget.updatedAt))}'),
               ],
             ),
           ),

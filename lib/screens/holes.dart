@@ -21,7 +21,7 @@ class _HolesScreenState extends State<HolesScreen> {
   late Detection? detection;
   int _total = 0;
 
-  Future<void> _getListCarParkingOverTime() async {
+  Future<void> _getListHoles() async {
     final Map<String, dynamic> response = await getListHolesService.getListHoles();
     if (response['status'] == 'OK') {
       if (response['data'] is String && response['data'] == 'null') {
@@ -29,6 +29,7 @@ class _HolesScreenState extends State<HolesScreen> {
           _detections = [];
         });
       } else {
+        print(_detections);
         setState(() {
           _detections = response['data'];
           _total = response['total'];
@@ -95,7 +96,7 @@ class _HolesScreenState extends State<HolesScreen> {
   @override
   void initState() {
     super.initState();
-    _getListCarParkingOverTime();
+    _getListHoles();
   }
 
   @override

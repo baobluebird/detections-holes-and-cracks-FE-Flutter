@@ -33,6 +33,7 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
   LatLng? _sourcePosition;
   LatLng? _destinationPosition;
   late BitmapDescriptor _maintainIcon;
+  late BitmapDescriptor _userIcon;
 
   bool _isSelectingSource = true;
   bool _isSelectingByHand = false;
@@ -47,15 +48,23 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
     super.initState();
     _loadCustomIcons().then((_) {
       _getUserLocation();
-      _getCurrentLocation();
       _fetchAndDrawRoutes();
+      _showMyLocation();
+
     });
   }
 
+  void reload() {
+    _showMyLocation();
+  }
+
   Future<void> _loadCustomIcons() async {
+    final Uint8List location =
+    await getBytesFromAsset('assets/images/car.png', 100);
     final Uint8List maintain =
         await getBytesFromAsset('assets/images/fix_road.png', 130);
     setState(() {
+      _userIcon = BitmapDescriptor.fromBytes(location);
       _maintainIcon = BitmapDescriptor.fromBytes(maintain);
     });
   }
@@ -73,7 +82,6 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
   void _showMyLocation() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    _updateMarkerPosition(position);
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
@@ -81,22 +89,28 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
     ));
   }
 
-  void _getCurrentLocation() async {
-    Geolocator.getPositionStream(
-            desiredAccuracy: LocationAccuracy.high, distanceFilter: 10)
-        .listen((Position position) {
-      _currentPosition = position;
-      _updateMarkerPosition(position);
-    });
-  }
-
   Future<void> _getUserLocation() async {
     Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    _currentPosition = position;
     _kGooglePlex = CameraPosition(
         target: LatLng(position.latitude, position.longitude), zoom: 14.4746);
-    _updateMarkerPosition(position);
+    _addMarker(position);
+  }
+
+  void _addMarker(Position position) {
+    setState(() {
+      _markers.add(
+        Marker(
+          icon: _userIcon,
+          markerId: MarkerId('myLocation'),
+          position: LatLng(position.latitude, position.longitude),
+          infoWindow: InfoWindow(
+            title: 'Your Location',
+            snippet: 'This is where you are.',
+          ),
+        ),
+      );
+    });
   }
 
   void _updateMarkerPosition(Position position) {
@@ -485,12 +499,13 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag1',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
-              onPressed: _showMyLocation,
+              onPressed: reload,
               tooltip: 'Show My Location',
-              child: Icon(Icons.my_location),
+              child:
+              Image.asset('assets/images/car.png', width: 30, height: 30),
             ),
           ),
           Positioned(
@@ -498,7 +513,7 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag2',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _showMaintainDialog,
@@ -511,7 +526,7 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag3',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _toggleSelectMode,
@@ -525,7 +540,7 @@ class MaintainMapScreenState extends State<MaintainMapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag4',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _clearMarkersAndPolylines,

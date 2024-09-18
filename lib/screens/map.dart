@@ -10,6 +10,7 @@ import 'package:safe_street/ipconfig/ip.dart';
 import 'package:safe_street/screens/send.dart';
 import 'dart:ui' as ui;
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 import 'maintain_map.dart';
 
@@ -54,6 +55,7 @@ class MapScreenState extends State<MapScreen> {
       _getUserLocation();
       _getCurrentLocation();
       _showMyLocation();
+      fetchData();
       _fetchAndDrawRoutes();
     });
   }
@@ -181,7 +183,7 @@ class MapScreenState extends State<MapScreen> {
     });
   }
 
-  Future<void> _drawRouteFormap(LatLng source, LatLng destination) async {
+  Future<void> _drawRouteForMap(LatLng source, LatLng destination, int date, String createdAt, String updatedAt) async {
     final response = await http.get(Uri.parse(
         'https://maps.googleapis.com/maps/api/directions/json?origin=${source.latitude},${source.longitude}&destination=${destination.latitude},${destination.longitude}&key=$api_key'));
 
@@ -213,7 +215,7 @@ class MapScreenState extends State<MapScreen> {
               markerId: MarkerId('midpoint_${id.value}'),
               position: midPoint,
               icon: _maintainIcon,
-              infoWindow: InfoWindow(title: 'Midpoint'),
+              infoWindow: InfoWindow(title: 'Date maintain: ${date}d', snippet: '${DateFormat('yyyy/MM/dd ').format(DateTime.parse(createdAt))} - ${DateFormat('yyyy/MM/dd ').format(DateTime.parse(updatedAt))}'),
             ),
           );
         }
@@ -224,7 +226,7 @@ class MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _fetchAndDrawRoutes() async {
-    var url = Uri.parse('$ip/detection/get-maintain-road-for-map');
+    var url = Uri.parse('$ip/detection/get-maintain-road');
     var response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -232,7 +234,10 @@ class MapScreenState extends State<MapScreen> {
       for (var route in data) {
         final locationA = _parseLatLng(route['locationA']);
         final locationB = _parseLatLng(route['locationB']);
-        await _drawRouteFormap(locationA, locationB);
+        final date = route['dateMaintain'];
+        final createdAt = route['createdAt'];
+        final updatedAt = route['updatedAt'];
+        await _drawRouteForMap(locationA, locationB, date, createdAt, updatedAt);
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -299,30 +304,12 @@ class MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: Stack(
         children: <Widget>[
-          // Positioned(
-          //   bottom: 220.0,
-          //   right: -4,
-          //   child: FloatingActionButton(
-          //     heroTag: 'uniqueTag4',
-          //     backgroundColor: Color(0xC0E6F8FF),
-          //     mini: true,
-          //     shape: const CircleBorder(),
-          //     onPressed: () {
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(builder: (context) => const MaintainMapScreen()),
-          //       );
-          //     },
-          //     tooltip: 'Create maintain road',
-          //     child: Icon(Icons.add_road),
-          //   ),
-          // ),
           Positioned(
             bottom: 130.0,
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag1',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: () {
@@ -340,12 +327,13 @@ class MapScreenState extends State<MapScreen> {
             right: -4,
             child: FloatingActionButton(
               heroTag: 'uniqueTag2',
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               mini: true,
               shape: const CircleBorder(),
               onPressed: _showMyLocation,
               tooltip: 'Show My Location',
-              child: const Icon(Icons.my_location),
+              child: Image.asset('assets/images/car.png',
+                  width: 30, height: 30),
             ),
           ),
           Positioned(
@@ -355,7 +343,7 @@ class MapScreenState extends State<MapScreen> {
               heroTag: 'uniqueTag3',
               mini: true,
               shape: const CircleBorder(),
-              backgroundColor: Color(0xC0E6F8FF),
+              backgroundColor: Color(0xFFFFFFFF),
               onPressed: _reloadData,
               tooltip: 'Reload Data',
               child: Icon(Icons.refresh),
@@ -368,6 +356,7 @@ class MapScreenState extends State<MapScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: Colors.white70,
+                  border: Border.all(color: Colors.blueAccent),
                 ),
                 child: Column(
                   children: [
@@ -375,7 +364,7 @@ class MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Maintain',
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.beVietnamPro(
                             textStyle: const TextStyle(
                               fontSize: 15,
                               color: Colors.black,
@@ -390,7 +379,7 @@ class MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Small Hole',
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.beVietnamPro(
                             textStyle: const TextStyle(
                               fontSize: 15,
                               color: Colors.black,
@@ -405,7 +394,7 @@ class MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Large Hole',
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.beVietnamPro(
                             textStyle: const TextStyle(
                               fontSize: 15,
                               color: Colors.black,
@@ -421,7 +410,7 @@ class MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Small Crack',
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.beVietnamPro(
                             textStyle: const TextStyle(
                               fontSize: 15,
                               color: Colors.black,
@@ -437,7 +426,7 @@ class MapScreenState extends State<MapScreen> {
                       children: [
                         Text(
                           'Large Crack',
-                          style: GoogleFonts.roboto(
+                          style: GoogleFonts.beVietnamPro(
                             textStyle: const TextStyle(
                               fontSize: 15,
                               color: Colors.black,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:safe_street/screens/list_detections.dart';
 
 import '../screens/admin.dart';
 import '../screens/maintain_map.dart';
+import '../screens/management.dart';
 import '../screens/map.dart';
 import '../screens/track.dart';
 import '../services/login_service.dart';
@@ -64,7 +66,8 @@ class _AdminHomeState extends State<AdminHome> {
       MapScreen(),
       TrackingMapScreen(),
       ListDetectionScreen(),
-      MaintainMapScreen()
+      MaintainMapScreen(),
+      ManagementScreen(),
     ];
   }
 
@@ -74,7 +77,17 @@ class _AdminHomeState extends State<AdminHome> {
       canPop: false,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Road Safety'),
+          backgroundColor: Colors.white60,
+          centerTitle: true,
+          title: Text('DUTSAFEROAD',
+            style: GoogleFonts.bebasNeue(
+              textStyle: const TextStyle(
+                fontSize: 30,
+                color: Colors.black,
+                letterSpacing: 1.5,
+              ),
+            ),
+        ),
         ),
         drawer: Drawer(
           child: ListView(
@@ -159,7 +172,7 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.drive_eta),
-              label: 'Tracking',
+              label: 'Drive',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list),
@@ -168,6 +181,10 @@ class _AdminHomeState extends State<AdminHome> {
             BottomNavigationBarItem(
               icon: Icon(Icons.add_road),
               label: 'Maintain',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.manage_accounts),
+              label: 'Manage',
             ),
           ],
         ),

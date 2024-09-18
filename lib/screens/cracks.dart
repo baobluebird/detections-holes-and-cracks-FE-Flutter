@@ -21,7 +21,7 @@ class _CrackScreenState extends State<CrackScreen> {
   late Detection? detection;
   int total = 0;
 
-  Future<void> _getListCarDuringParking() async {
+  Future<void> _getListCracks() async {
     final Map<String, dynamic> response = await getListCracksService.getListCracks();
     if (response['status'] == 'OK') {
       if (response['data'] is String && response['data'] == 'null') {
@@ -94,7 +94,7 @@ class _CrackScreenState extends State<CrackScreen> {
   @override
   void initState() {
     super.initState();
-    _getListCarDuringParking();
+    _getListCracks();
   }
 
   @override
